@@ -1,0 +1,11 @@
+{
+  "agencyDetails": {
+    "identifiers": [
+      {
+        "id": ["digit(1020)", {"exclude": [0]}],
+        "types": ["digit(2, 1220)", {"include": [0]}],
+        "id": ["length(8, 1500)", {"exclude": [1]}]
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "currency": "2018-22-22",
+  "agencyDetails": {
+    "identifiers": [
+      {
+        "id": "12345675",
+        "types": "12"
+      },
+      {
+        "id": "1245671",
+        "types": "2"
+      },
+      {
+        "id": "12345675",
+        "types": "3"
+      }
+    ]
+  },
+  "guestCounts": {
+    "additionalProp1": 0,
+    "additionalProp2": 0,
+    "additionalProp3": 0
+  },
+  "rates": {
+    "ratePlanCodes": [
+      "",
+      "BTI"
+    ],
+    "groupCode": "string",
+    "types": [
+      "12",
+      ""
+    ],
+    "themesAndElements": [
+      1001,
+      1002
+    ],
+    "customDisplay": "string"
+  },
+  "products": [
+    {
+      "productTypeCode": "SLPRM",
+      "categoryCode": "SR",
+      "attributes": [
+        "RVT25"
+      ],
+      "productCode": "KNGN",
+      "quantity": "",
+      "AgeQualifyingCode": [
+        "Adult",
+        "child"
+      ],
+      "guestCounts": [
+        "1",
+        "2"
+      ]
+    }
+  ],
+  "options": {
+    "disabilityMode": "accessibleIfNoAvail",
+    "budget": {
+      "type": "daily",
+      "min": "",
+      "max": ""
+    },
+    "forceExcludeTax": false,
+    "includeSellStrategy": "followChannel",
+    "applyRoomSubstitution": false,
+    "securityIndicators": {
+      "bypassPropertyCdnumberCheck": true,
+      "viewPropertyNonDisplayableRoom": true,
+      "bypassPropertyMaxRoomOccupancy": true,
+      "bypassPropertyMaxNumberOfRooms": true,
+      "allowPropertyGroupLocalControl": true,
+      "retrievePropertyGroupContractBypassSecurity": true,
+      "allowPropertyForceSell": true
+    },
+    "description": {
+      "ratePlanLongDesc": false,
+      "productLongDesc": false
+    },
+    "loyalty": {
+      "loyaltyId": "string",
+      "programName": "AMB",
+      "programLevel": "AMB"
+    }
+  },
+  "corporateAccounts": [
+    {
+      "cdNumber": "",
+      "accountName": "Amadeus account",
+      "isCdAutoAppended": true
+    }
+  ],
+  "Pos_Header": {
+    "agentLocation": "FR",
+    "agentDutyCode": "GS",
+    "agentSine": "A0001AA"
+  },
+  "value": "123.00"
+}
