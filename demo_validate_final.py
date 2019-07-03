@@ -5,7 +5,7 @@ from datetime import datetime
 import copy
 
 # ["decimal-100", "digit-200", "list-300", "exact_enum-400", "string-500", "boolean-600", "alphanum-700", "timestamp-800", "date-900", "conditional_key_validate-1000", "email=1100", "phone-1200", "length-1300", "required-1400"]
-validation_list = ["decimal", "digit", "list", "exact_enum", "string", "boolean", "alphanum", "timestamp", "date", "conditional_key_validate", "email", "phone"]
+validation_list = ["decimal", "digit", "list", "exact_enum", "string", "boolean", "alphanum", "timestamp", "date", "email", "phone"]
 default = "00"
 
 
@@ -16,8 +16,8 @@ class ValidationError(Exception):
 
 
 class Validation(object):
-    # def __init__(self, config_file):
-    #     self.config_file = config_file
+    # def __init__(self, input):
+    #     self.input = input
 
     def length_required_checker(self, type, key, value, source_dict):
         if 'length' in value:
@@ -42,6 +42,9 @@ class Validation(object):
         length = 0
         if len(list1) == 1:
             error_code = list1[0]
+        elif len(list1) == 3:
+            length = list1[0:2]
+            error_code = list1[2]
         else:
             length = list1[0]
             error_code = list1[1]
@@ -54,6 +57,71 @@ class Validation(object):
                 self.length(key, value[7:-1], source_dict)
         else:
             raise ValidationError(int(error_code), "'{}' is not a string".format(key))
+
+    def key_check(self, path, source_dict):
+        flag = 1
+        for i in path:
+            if '[' not in i:
+                if i in source_dict.keys():
+                    source_dict = source_dict.get(i)
+                else:
+                    flag = None
+            else:
+                if i.count('[') == 2:
+                    index = i[(i.index('[', i.index('[') + 1) + 1):-1]
+                else:
+                    index = range(len(source_dict.get(i[1:(i.index(']')-1)])))
+                for j in index:
+                    source_dict = copy.deepcopy(source_dict)
+                    if source_dict.get(i[1:(i.index(']')-1)]-1)[j]:
+                        pass
+                    #TODO
+
+        return flag
+
+    def conditional_key_validate(self, args, source_dict):
+        length, error_code = self.check_length(args)
+        flag = 1
+        if len(length) == 2 and isinstance(source_dict, dict):
+            if '/' not in length[1]:
+                if length[0].strip() in source_dict.keys():
+                    if length[1].strip() in source_dict.keys():
+                        pass
+                    else:
+                        raise ValidationError(int(error_code), "'{}' not available while '{}' exist".format(length[1], length[0]))
+                else:
+                    pass
+            else:
+                if length[0].strip() in source_dict.keys():
+                    path = length[1].strip().split('/')
+                    local_dict = self.input
+                    for i in range(len(path)):
+                        if flag == 1:
+                            if '[' not in path[i]:
+                                if path[i] in local_dict.keys():
+                                    local_dict = local_dict.get(path[i])
+                                else:
+                                    raise ValidationError(int(error_code),
+                                                          "'{}' not available while '{}' exist".format(length[1], length[0]))
+                            else:
+                                braket_index = path[i].index(']')
+                                a = path[i][1:braket_index]
+                                index = path[i][(path[i].index('[', path[i].index('[') + 1) + 1):-1] if path[i].count(
+                                    '[') == 2 else range(len(local_dict.get(path[i][1:braket_index])))
+                                path[i] = path[i][1:braket_index]
+                                for j in index:
+                                    value = self.key_check(path[i+1:], local_dict.get(path[i])[int(j)])
+                                    if value:
+                                        flag = 0
+                                    else:
+                                        raise ValidationError(int(error_code),
+                                                              "'{}' not available while '{}' exist".format(length[1],
+                                                                                                           length[0]))
+
+                else:
+                    pass
+        else:
+            raise ValidationError(int(default), "format is not correct")
 
     def exact_enum(self, key, value, source_dict):
         params = value[11:-1]
@@ -191,6 +259,20 @@ class Validation(object):
                 else:
                     getattr(self, i[0:-8])(key, i, source_dict)
 
+    def parent_collector(self, value, source_dict):
+        if isinstance(value, list):
+            for j in value:
+                self.parent_collector(j, source_dict)
+
+        elif isinstance(value, str):
+            if "conditional_key_validate" in value:
+                args = value[25:-1]
+                if isinstance(source_dict, list):
+                    for i in range(len(source_dict)):
+                        self.conditional_key_validate(args, source_dict[i])
+                elif isinstance(source_dict, dict):
+                    self.conditional_key_validate(args, source_dict)
+
     def read_config(self, config_dict, source_dict):
         if isinstance(config_dict, dict):
             for key, value in config_dict.items():
@@ -212,6 +294,7 @@ class Validation(object):
                                     # demo_source_dict = source_dict
                                     for k in index:
                                         demo_source_dict.remove(demo_source_dict[k])
+                                # value.remove(i)
                                 # else:
                                 #     demo_source_dict = source_dict
                                 z = 0
@@ -222,6 +305,9 @@ class Validation(object):
                                     elif "required" in value[z]:
                                         self.length_required_checker('required', key, value[z], demo_source_dict)
                                         z += 1
+                                    elif key == "$parent":
+                                        self.parent_collector(value, demo_source_dict)
+                                        break
                                     elif item in value[z]:
                                         self.format_checker(item, key, value[z], demo_source_dict)
                                         z += 1
@@ -262,6 +348,7 @@ class Validation(object):
     def start_validate(self, config_file, source_file):
         config_dict = json.loads(open(config_file, 'r').read())
         source_dict = json.loads(open(source_file, 'r').read())
+        self.input = source_dict
         self.read_config(config_dict, source_dict)
 
 
